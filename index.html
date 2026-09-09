@@ -1,1 +1,674 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>나의 학습유형 리포트</title>
+<style>
+  :root{
+    --navy:#1B2A4A;
+    --navy-light:#E9EDF5;
+    --coral:#FF6B5B;
+    --coral-light:#FFE8E5;
+    --gold:#D4A73D;
+    --gold-light:#FBF1DC;
+    --white:#FFFFFF;
+    --dark:#27272A;
+    --gray:#8A8F98;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;
+    font-family:"Apple SD Gothic Neo","Malgun Gothic","Pretendard",sans-serif;
+    background:linear-gradient(160deg, var(--navy) 0%, #24365f 45%, var(--navy) 100%);
+    color:var(--dark);
+    min-height:100vh;
+  }
+  #app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:transparent;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .screen{
+    display:none;
+    flex-direction:column;
+    flex:1;
+    padding:28px 22px 40px;
+    animation:fadeIn .35s ease;
+  }
+  .screen.active{display:flex;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
+  /* ---------- INTRO ---------- */
+  .badge{
+    align-self:flex-start;
+    background:var(--gold);
+    color:var(--navy);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.06em;
+    padding:5px 10px;
+    border-radius:20px;
+    margin-bottom:16px;
+  }
+  .intro-icon{
+    font-size:52px;
+    margin-bottom:10px;
+  }
+  h1.intro-title{
+    color:var(--white);
+    font-size:26px;
+    line-height:1.4;
+    margin:0 0 10px;
+    font-weight:800;
+  }
+  p.intro-desc{
+    color:#C9D2E3;
+    font-size:14.5px;
+    line-height:1.7;
+    margin:0 0 24px;
+  }
+  .intro-card{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:14px;
+  }
+  .intro-card-title{
+    color:var(--gold);
+    font-size:12.5px;
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .intro-list{
+    list-style:none;
+    margin:0;padding:0;
+    color:#DCE3F0;
+    font-size:13.5px;
+    line-height:2;
+  }
+  .intro-list li{display:flex;align-items:center;gap:8px;}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--coral);flex-shrink:0;}
+  .spacer{flex:1;}
+  .btn-primary{
+    background:linear-gradient(135deg, var(--coral), #ff8271);
+    color:#fff;
+    border:none;
+    padding:16px;
+    font-size:16px;
+    font-weight:800;
+    border-radius:14px;
+    cursor:pointer;
+    box-shadow:0 10px 24px rgba(255,107,91,.35);
+    transition:transform .15s ease;
+  }
+  .btn-primary:active{transform:scale(.97);}
+  .btn-secondary{
+    background:transparent;
+    color:var(--white);
+    border:1.5px solid rgba(255,255,255,.35);
+    padding:14px;
+    font-size:14.5px;
+    font-weight:700;
+    border-radius:14px;
+    cursor:pointer;
+    margin-top:10px;
+  }
+
+  /* ---------- QUIZ ---------- */
+  .progress-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:26px;
+  }
+  .progress-bar{
+    flex:1;
+    height:8px;
+    background:rgba(255,255,255,.15);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--coral),var(--gold));
+    border-radius:6px;
+    transition:width .35s ease;
+    width:0%;
+  }
+  .progress-label{
+    color:#C9D2E3;
+    font-size:12px;
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .q-eyebrow{
+    color:var(--gold);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.05em;
+    margin-bottom:8px;
+  }
+  .q-text{
+    color:var(--white);
+    font-size:21px;
+    font-weight:800;
+    line-height:1.5;
+    margin:0 0 26px;
+  }
+  .option{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:rgba(255,255,255,.07);
+    border:1.5px solid rgba(255,255,255,.14);
+    border-radius:16px;
+    padding:16px 16px;
+    margin-bottom:12px;
+    cursor:pointer;
+    transition:all .15s ease;
+    color:#EFF2F8;
+    font-size:14.5px;
+    line-height:1.5;
+  }
+  .option:hover{
+    background:rgba(255,255,255,.13);
+    border-color:var(--coral);
+    transform:translateX(2px);
+  }
+  .option .emo{font-size:22px;flex-shrink:0;}
+  .quiz-back{
+    color:#8b93a8;
+    font-size:13px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    margin-bottom:6px;
+    align-self:flex-start;
+    padding:0;
+  }
+
+  /* ---------- LOADING ---------- */
+  #screen-loading{align-items:center;justify-content:center;text-align:center;}
+  .loader-ring{
+    width:64px;height:64px;
+    border:5px solid rgba(255,255,255,.15);
+    border-top-color:var(--coral);
+    border-radius:50%;
+    animation:spin 0.9s linear infinite;
+    margin-bottom:22px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-text{color:var(--white);font-size:16px;font-weight:700;margin-bottom:6px;}
+  .loading-sub{color:#9AA5BC;font-size:13px;}
+
+  /* ---------- RESULT ---------- */
+  .report-wrap{
+    background:var(--white);
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,.35);
+  }
+  .report-header{
+    background:linear-gradient(135deg,var(--navy) 0%,#2c4270 100%);
+    padding:26px 22px 22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .report-header::after{
+    content:"";
+    position:absolute;
+    top:-40px;right:-40px;
+    width:140px;height:140px;
+    background:radial-gradient(circle, rgba(212,167,61,.35), transparent 70%);
+  }
+  .report-tag{
+    display:inline-block;
+    background:var(--gold);
+    color:var(--navy);
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:.08em;
+    padding:4px 10px;
+    border-radius:20px;
+    margin-bottom:12px;
+  }
+  .report-name{
+    color:#B9C4DC;
+    font-size:12.5px;
+    margin-bottom:4px;
+  }
+  .report-type-emoji{font-size:44px;margin-bottom:6px;display:block;}
+  .report-type-title{
+    color:var(--white);
+    font-size:23px;
+    font-weight:800;
+    margin:0 0 4px;
+    line-height:1.35;
+  }
+  .report-type-sub{
+    color:var(--gold-light);
+    font-size:13px;
+    font-weight:600;
+  }
+  .report-body{padding:22px;}
+  .section-title{
+    display:flex;align-items:center;gap:6px;
+    font-size:13.5px;
+    font-weight:800;
+    color:var(--navy);
+    margin:0 0 12px;
+  }
+  .section-title .bar{width:4px;height:14px;background:var(--coral);border-radius:3px;display:inline-block;}
+  .desc-box{
+    background:var(--navy-light);
+    border-radius:14px;
+    padding:15px 16px;
+    font-size:13.5px;
+    line-height:1.7;
+    color:#31405F;
+    margin-bottom:22px;
+  }
+
+  .chart-row{display:flex;gap:16px;align-items:center;margin-bottom:22px;}
+  .radar-box{flex-shrink:0;}
+  .bars{flex:1;display:flex;flex-direction:column;gap:10px;}
+  .bar-item .bar-label{
+    display:flex;justify-content:space-between;
+    font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px;
+  }
+  .bar-track{
+    height:9px;background:#EEF1F7;border-radius:6px;overflow:hidden;
+  }
+  .bar-fill{
+    height:100%;border-radius:6px;width:0%;
+    transition:width 1s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .tip-list{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:10px;}
+  .tip-item{
+    display:flex;gap:10px;
+    background:var(--coral-light);
+    border-radius:12px;
+    padding:12px 13px;
+    font-size:13px;
+    line-height:1.6;
+    color:#5C3A34;
+  }
+  .tip-num{
+    flex-shrink:0;width:20px;height:20px;border-radius:50%;
+    background:var(--coral);color:#fff;font-size:11px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .fit-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;}
+  .chip{
+    background:var(--gold-light);
+    color:#7A5B14;
+    font-size:12px;
+    font-weight:700;
+    padding:7px 12px;
+    border-radius:20px;
+  }
+
+  .disclaimer{
+    font-size:11px;
+    color:var(--gray);
+    line-height:1.6;
+    border-top:1px dashed #E2E5EC;
+    padding-top:14px;
+    margin-bottom:6px;
+  }
+
+  .result-actions{padding:18px 22px 4px;display:flex;flex-direction:column;gap:10px;}
+  .btn-outline-navy{
+    background:transparent;
+    border:1.5px solid var(--navy);
+    color:var(--navy);
+    padding:13px;
+    font-size:14px;
+    font-weight:700;
+    border-radius:12px;
+    cursor:pointer;
+  }
+
+  footer.note{
+    text-align:center;
+    color:#7C88A6;
+    font-size:11.5px;
+    padding:18px 24px 6px;
+  }
+
+  ::selection{background:var(--coral);color:#fff;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ INTRO ============ -->
+  <section class="screen active" id="screen-intro">
+    <span class="badge">CAREER LAB · 학습유형 정밀 분석</span>
+    <h1 class="intro-title">나는 어떻게 배울 때<br/>제일 쏙쏙 이해될까?</h1>
+    <p class="intro-desc">12개의 짧은 질문에 답하면, 나만의 학습 시그니처를 분석해서<br/>진짜 나에게 맞는 공부법 리포트를 만들어드려요.</p>
+
+    <div class="intro-card">
+      <div class="intro-card-title">✔️ 이런 걸 알 수 있어요</div>
+      <ul class="intro-list">
+        <li><span class="dot"></span> 나의 학습유형 (시각 · 청각 · 체각)</li>
+        <li><span class="dot"></span> 나에게 맞는 맞춤 공부 꿀팁</li>
+        <li><span class="dot"></span> 나와 잘 맞는 활동 스타일</li>
+      </ul>
+    </div>
+
+    <div class="spacer"></div>
+    <button class="btn-primary" onclick="goTo('quiz'); startQuiz();">테스트 시작하기 (약 3분)</button>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section class="screen" id="screen-quiz">
+    <button class="quiz-back" onclick="prevQuestion()">‹ 이전</button>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">1 / 12</div>
+    </div>
+    <div class="q-eyebrow">QUESTION</div>
+    <h2 class="q-text" id="qText">질문</h2>
+    <div id="optionsWrap"></div>
+  </section>
+
+  <!-- ============ LOADING ============ -->
+  <section class="screen" id="screen-loading">
+    <div class="loader-ring"></div>
+    <div class="loading-text" id="loadingText">답변을 분석하고 있어요</div>
+    <div class="loading-sub">나만의 학습 시그니처를 찾는 중...</div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section class="screen" id="screen-result">
+    <div class="report-wrap">
+      <div class="report-header">
+        <div class="report-tag">PERSONAL LEARNING REPORT</div>
+        <div class="report-name">나의 학습유형 분석 결과</div>
+        <span class="report-type-emoji" id="resEmoji">🖼️</span>
+        <h2 class="report-type-title" id="resTitle">비주얼형</h2>
+        <div class="report-type-sub" id="resSub">장면 포착러</div>
+      </div>
+
+      <div class="report-body">
+        <div class="section-title"><span class="bar"></span>이런 사람이에요</div>
+        <div class="desc-box" id="resDesc"></div>
+
+        <div class="section-title"><span class="bar"></span>학습 밸런스 분석</div>
+        <div class="chart-row">
+          <div class="radar-box" id="radarBox"></div>
+          <div class="bars" id="barsBox"></div>
+        </div>
+
+        <div class="section-title"><span class="bar"></span>나만의 학습 꿀팁</div>
+        <ul class="tip-list" id="tipList"></ul>
+
+        <div class="section-title"><span class="bar"></span>이런 활동에서 빛나요</div>
+        <div class="fit-chips" id="fitChips"></div>
+
+        <div class="disclaimer">※ 이 테스트는 나를 이해하는 데 도움을 주는 자기이해 활동으로, 과학적으로 검증된 진단 도구가 아니에요. 재미있게 참고만 해주세요 :)</div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn-outline-navy" onclick="restart()">다시 테스트하기</button>
+      </div>
+    </div>
+    <footer class="note">캡처 또는 스크린샷으로 나만의 리포트를 저장해보세요 📸</footer>
+  </section>
+
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const questions = [
+  { q:"새로운 걸 배울 때, 나는...", options:[
+      {t:"그림이나 도표를 보면 이해가 쏙쏙!", type:"V", e:"🖼️"},
+      {t:"설명을 들으면 이해가 쏙쏙!", type:"A", e:"🎧"},
+      {t:"직접 해봐야 이해가 쏙쏙!", type:"K", e:"✋"} ]},
+  { q:"시험공부할 때, 나는...", options:[
+      {t:"색펜으로 필기하고 마인드맵 그리기", type:"V", e:"🖍️"},
+      {t:"소리 내어 읽거나 녹음해서 듣기", type:"A", e:"🔊"},
+      {t:"걸어 다니며 외우거나 손으로 써보기", type:"K", e:"🚶"} ]},
+  { q:"길을 찾을 때, 나는...", options:[
+      {t:"지도를 보고 이미지로 기억한다", type:"V", e:"🗺️"},
+      {t:"누군가에게 물어보거나 설명을 듣는다", type:"A", e:"🙋"},
+      {t:"일단 걸어가면서 감으로 찾는다", type:"K", e:"👣"} ]},
+  { q:"발표 준비할 때, 나는...", options:[
+      {t:"PPT 디자인과 이미지에 신경쓴다", type:"V", e:"🎨"},
+      {t:"말하는 연습을 소리내서 반복한다", type:"A", e:"🗣️"},
+      {t:"제스처를 연습하며 몸으로 익힌다", type:"K", e:"🙆"} ]},
+  { q:"친구가 뭔가 설명해줄 때, 나는...", options:[
+      {t:"그림 그려가며 설명해주면 좋다", type:"V", e:"✏️"},
+      {t:"그냥 말로 설명해줘도 잘 이해된다", type:"A", e:"💬"},
+      {t:"직접 보여주면서 설명해주면 좋다", type:"K", e:"👀"} ]},
+  { q:"집중이 안 될 때, 나는...", options:[
+      {t:"깔끔하게 정리된 공간이 필요하다", type:"V", e:"🧹"},
+      {t:"조용한 음악이나 백색소음이 필요하다", type:"A", e:"🎵"},
+      {t:"몸을 움직이거나 자세를 바꿔야 한다", type:"K", e:"🔄"} ]},
+  { q:"새로운 앱이나 게임을 배울 때, 나는...", options:[
+      {t:"튜토리얼 화면을 꼼꼼히 본다", type:"V", e:"📱"},
+      {t:"설명 영상이나 리뷰를 듣는다", type:"A", e:"📺"},
+      {t:"일단 눌러보면서 배운다", type:"K", e:"👆"} ]},
+  { q:"오래 기억에 남는 건...", options:[
+      {t:"인상 깊은 사진이나 장면", type:"V", e:"📸"},
+      {t:"인상 깊은 대화나 노래 가사", type:"A", e:"🎤"},
+      {t:"인상 깊은 경험이나 내가 한 행동", type:"K", e:"🏃"} ]},
+  { q:"필기할 때, 나는...", options:[
+      {t:"표·그림·색깔로 꾸며서 정리한다", type:"V", e:"📊"},
+      {t:"말하듯이 문장으로 풀어서 정리한다", type:"A", e:"📝"},
+      {t:"키워드만 쓰고 나머진 몸으로 익힌다", type:"K", e:"🔑"} ]},
+  { q:"스트레스를 풀 때, 나는...", options:[
+      {t:"영상이나 드라마를 본다", type:"V", e:"🎬"},
+      {t:"음악을 듣거나 친구와 수다 떤다", type:"A", e:"☎️"},
+      {t:"운동하거나 밖에 나가서 움직인다", type:"K", e:"⚽"} ]},
+  { q:"좋아하는 수업 방식은...", options:[
+      {t:"영상 자료나 슬라이드 위주 수업", type:"V", e:"🖥️"},
+      {t:"선생님 강의와 토론 위주 수업", type:"A", e:"🎙️"},
+      {t:"실습과 체험 위주 활동 수업", type:"K", e:"🧪"} ]},
+  { q:"물건 사용법을 익힐 때, 나는...", options:[
+      {t:"설명서의 그림을 본다", type:"V", e:"📖"},
+      {t:"누군가 설명하는 걸 듣는다", type:"A", e:"👂"},
+      {t:"그냥 만져보면서 익힌다", type:"K", e:"🔧"} ]},
+];
+
+const typeInfo = {
+  V:{
+    emoji:"🖼️", title:"비주얼형", sub:"장면 포착러",
+    color:"#3E6FE0",
+    desc:"눈으로 보는 정보에 유독 강한 타입이에요. 그림, 도표, 색깔로 정리된 자료를 보면 머릿속에 착 붙고, 한 번 본 장면이나 화면은 잘 잊지 않아요. '백문이 불여일견', 딱 내 얘기죠.",
+    tips:[
+      "필기할 때 색펜·마인드맵·도식을 적극 활용하기",
+      "강의 내용은 관련 이미지·영상 자료와 함께 보기",
+      "암기할 내용은 그림이나 인포그래픽으로 바꿔보기"
+    ],
+    fits:["인포그래픽 제작","발표자료 디자인","기획·마케팅","디자인 직무"]
+  },
+  A:{
+    emoji:"🎧", title:"오디오형", sub:"리스닝 장인",
+    color:"#E0973E",
+    desc:"듣는 정보에 유독 강한 타입이에요. 강의나 대화, 토론에서 이해가 빠르고, 소리 내어 말하거나 읽을 때 기억이 오래 남아요. 누군가와 얘기하다 보면 생각이 정리되는 스타일이죠.",
+    tips:[
+      "소리 내어 읽거나 스스로에게 설명하며 공부하기",
+      "강의를 녹음해서 이동 중에 다시 듣기",
+      "친구와 토론하거나 서로 설명해주며 공부하기"
+    ],
+    fits:["발표·토론 활동","상담·설명 직무","콘텐츠·방송 제작","팀 프로젝트 리더"]
+  },
+  K:{
+    emoji:"✋", title:"무브형", sub:"일단 해보GO",
+    color:"#E05B5B",
+    desc:"직접 해보는 경험에서 가장 잘 배우는 타입이에요. 몸으로 부딪히고 실습하면서 이해가 확 트이고, 가만히 앉아있는 것보단 움직이면서 배울 때 집중이 잘 돼요.",
+    tips:[
+      "실습·체험 위주로 학습 계획을 짜기",
+      "걸어 다니며 암기하거나 손으로 직접 써보기",
+      "짧은 휴식마다 몸을 움직여 집중력 리셋하기"
+    ],
+    fits:["현장실습·체험활동","실무·서비스 직무","운동·활동형 프로젝트","메이커 활동"]
+  }
+};
+
+/* ---------------- STATE ---------------- */
+let current = 0;
+let answers = [];
+let scores = {V:0,A:0,K:0};
+
+function goTo(name){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("screen-"+name).classList.add("active");
+  window.scrollTo(0,0);
+}
+
+function startQuiz(){
+  current = 0;
+  answers = [];
+  scores = {V:0,A:0,K:0};
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = questions[current];
+  document.getElementById("qText").textContent = q.q;
+  document.getElementById("progressLabel").textContent = (current+1)+" / "+questions.length;
+  document.getElementById("progressFill").style.width = ((current)/questions.length*100)+"%";
+
+  const wrap = document.getElementById("optionsWrap");
+  wrap.innerHTML = "";
+  q.options.forEach((opt, idx)=>{
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerHTML = '<span class="emo">'+opt.e+'</span><span>'+opt.t+'</span>';
+    div.onclick = ()=>selectOption(opt.type);
+    wrap.appendChild(div);
+  });
+}
+
+function selectOption(type){
+  answers[current] = type;
+  scores[type] = (scores[type]||0) + 1;
+  if(current < questions.length - 1){
+    current++;
+    renderQuestion();
+  } else {
+    document.getElementById("progressFill").style.width = "100%";
+    goTo("loading");
+    setTimeout(()=>{ buildResult(); goTo("result"); }, 1200);
+  }
+}
+
+function prevQuestion(){
+  if(current === 0){ goTo("intro"); return; }
+  // undo score of the question we're leaving from
+  const lastType = answers[current-1];
+  if(lastType){ scores[lastType] = Math.max(0,(scores[lastType]||0)-1); }
+  current--;
+  renderQuestion();
+}
+
+function restart(){
+  goTo("intro");
+}
+
+/* ---------------- RESULT BUILD ---------------- */
+function buildResult(){
+  const total = questions.length;
+  const sorted = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const top = sorted[0][0];
+  const info = typeInfo[top];
+
+  document.getElementById("resEmoji").textContent = info.emoji;
+  document.getElementById("resTitle").textContent = info.title;
+  document.getElementById("resSub").textContent = info.sub;
+  document.getElementById("resDesc").textContent = info.desc;
+
+  const tipList = document.getElementById("tipList");
+  tipList.innerHTML = "";
+  info.tips.forEach((t,i)=>{
+    const li = document.createElement("li");
+    li.className = "tip-item";
+    li.innerHTML = '<span class="tip-num">'+(i+1)+'</span><span>'+t+'</span>';
+    tipList.appendChild(li);
+  });
+
+  const chips = document.getElementById("fitChips");
+  chips.innerHTML = "";
+  info.fits.forEach(f=>{
+    const c = document.createElement("span");
+    c.className = "chip";
+    c.textContent = f;
+    chips.appendChild(c);
+  });
+
+  // bars
+  const order = ["V","A","K"];
+  const labels = {V:"시각 (Visual)", A:"청각 (Auditory)", K:"체각 (Kinesthetic)"};
+  const barsBox = document.getElementById("barsBox");
+  barsBox.innerHTML = "";
+  order.forEach(k=>{
+    const pct = Math.round((scores[k]/total)*100);
+    const item = document.createElement("div");
+    item.className = "bar-item";
+    item.innerHTML = '<div class="bar-label"><span>'+labels[k]+'</span><span>'+pct+'%</span></div>'+
+      '<div class="bar-track"><div class="bar-fill" style="background:'+typeInfo[k].color+'"></div></div>';
+    barsBox.appendChild(item);
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{ item.querySelector(".bar-fill").style.width = pct+"%"; }, 80);
+    });
+  });
+
+  // radar (triangle) chart
+  drawRadar(scores, total);
+}
+
+function drawRadar(scores, total){
+  const size = 130, cx = size/2, cy = size/2, R = 48;
+  const axes = ["V","A","K"];
+  const angles = [-90, 30, 150]; // degrees, V top, A bottom-right, K bottom-left
+
+  function pt(angleDeg, r){
+    const rad = angleDeg * Math.PI/180;
+    return [cx + r*Math.cos(rad), cy + r*Math.sin(rad)];
+  }
+
+  // grid rings
+  let gridSvg = "";
+  [0.33,0.66,1].forEach(f=>{
+    const pts = angles.map(a=>pt(a, R*f).join(",")).join(" ");
+    gridSvg += '<polygon points="'+pts+'" fill="none" stroke="#E4E8F0" stroke-width="1"/>';
+  });
+  // axis lines
+  angles.forEach(a=>{
+    const [x,y] = pt(a, R);
+    gridSvg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="#E4E8F0" stroke-width="1"/>';
+  });
+
+  // data polygon
+  const dataPts = angles.map((a,i)=>{
+    const val = scores[axes[i]]/total; // 0..1
+    return pt(a, R*val).join(",");
+  }).join(" ");
+
+  const dataSvg = '<polygon points="'+dataPts+'" fill="rgba(255,107,91,0.35)" stroke="#FF6B5B" stroke-width="2"/>';
+
+  // labels
+  const labelPts = angles.map(a=>pt(a, R+16));
+  const labelText = ["V","A","K"];
+  let labelsSvg = "";
+  labelPts.forEach((p,i)=>{
+    labelsSvg += '<text x="'+p[0]+'" y="'+p[1]+'" font-size="11" font-weight="800" fill="#1B2A4A" text-anchor="middle" dominant-baseline="middle">'+labelText[i]+'</text>';
+  });
+
+  const svg = '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">'+gridSvg+dataSvg+labelsSvg+'</svg>';
+  document.getElementById("radarBox").innerHTML = svg;
+}
+</script>
+</body>
+</html>
